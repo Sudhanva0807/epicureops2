@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Epicure Robotics — The Smoothie Bar</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Nunito:wght@300;400;600;700&display=swap');
+
+:root {
+  --bg: #0e0f0d;
+  --surface: #151714;
+  --card: #1b1e19;
+  --border: #2a2e26;
+  --accent: #a8d166;
+  --accent2: #f5c842;
+  --accent3: #e8714a;
+  --text: #e8ead4;
+  --muted: #6b7060;
+  --done: #4a7c1f;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(168,209,102,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(245,200,66,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  flex-direction: column;
+}
+
+.login-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 44px 40px 36px;
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+}
+
+.login-logo {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--accent), #6ab52a);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  color: #0e0f0d;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.login-card h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.login-card .login-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 5px;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.login-field {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.login-field label {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.login-field input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 11px 14px;
+  font-size: 13px;
+  font-family: 'Nunito', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.login-field input:focus { border-color: var(--accent); }
+
+.login-error {
+  font-size: 11px;
+  color: var(--accent3);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 10px;
+  min-height: 16px;
+  text-align: center;
+}
+
+.login-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #0e0f0d;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s;
+  margin-top: 4px;
+}
+.login-btn:hover { opacity: 0.85; }
+
+.login-hint {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  margin-top: 18px;
+  text-align: center;
+  opacity: 0.5;
+}
+
+/* ── APP (hidden until login) ── */
+#app { display: none; padding-bottom: 60px; }
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(135deg, #1a1f16 0%, #111410 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 22px 28px 18px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo-mark {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--accent), #6ab52a);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px; color: #0e0f0d; font-weight: 700; flex-shrink: 0;
+}
+.brand-text h1 { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); line-height: 1; }
+.brand-text p { font-size: 9px; color: var(--muted); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+.header-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+.progress-wrap { display: flex; align-items: center; gap: 8px; }
+.progress-bar-bg { width: 130px; height: 5px; background: var(--border); border-radius: 10px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 10px; transition: width 0.4s ease; width: 0%; }
+.progress-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); min-width: 44px; text-align: right; }
+
+.date-display { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+
+.report-btn {
+  background: rgba(168,209,102,0.12); border: 1px solid rgba(168,209,102,0.35); border-radius: 8px;
+  padding: 6px 14px; font-size: 10px; color: var(--accent); cursor: pointer;
+  font-family: 'DM Mono', monospace; transition: all 0.2s; letter-spacing: 0.5px;
+}
+.report-btn:hover { background: rgba(168,209,102,0.22); }
+
+/* ── REPORT MODAL ── */
+.report-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.82); z-index: 600;
+  align-items: flex-start; justify-content: center;
+  padding: 30px 16px 60px; overflow-y: auto;
+}
+.report-overlay.show { display: flex; }
+
+.report-modal {
+  background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+  width: 100%; max-width: 620px; overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+  animation: slideIn 0.3s ease;
+}
+
+.report-top {
+  background: linear-gradient(135deg, #1a1f16, #111410);
+  padding: 24px 28px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.report-top-left h2 { font-family: 'DM Serif Display', serif; font-size: 20px; color: var(--text); }
+.report-top-left p { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 4px; letter-spacing: 1px; }
+.report-close {
+  background: transparent; border: 1px solid var(--border); border-radius: 8px;
+  padding: 5px 10px; font-size: 14px; color: var(--muted); cursor: pointer;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.report-close:hover { border-color: var(--accent3); color: var(--accent3); }
+
+.report-body { padding: 22px 28px; display: flex; flex-direction: column; gap: 20px; }
+
+.report-section-title {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+
+.report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.report-stat {
+  background: var(--surface); border-radius: 10px; padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+.report-stat .rs-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.5px; }
+.report-stat .rs-value { font-size: 18px; font-weight: 700; color: var(--text); margin-top: 4px; font-family: 'DM Serif Display', serif; }
+.report-stat .rs-sub { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+.report-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.report-row:last-child { border-bottom: none; }
+.report-row .rr-label { font-size: 12px; color: var(--text); }
+.report-row .rr-val { font-size: 12px; font-family: 'DM Mono', monospace; }
+.rr-good { color: var(--accent); }
+.rr-warn { color: var(--accent2); }
+.rr-bad { color: var(--accent3); }
+.rr-muted { color: var(--muted); }
+
+.report-issues-list { display: flex; flex-direction: column; gap: 6px; }
+.report-issue-item {
+  background: var(--surface); border-radius: 8px; padding: 9px 12px;
+  font-size: 11px; border-left: 3px solid var(--accent3);
+  font-family: 'DM Mono', monospace; color: var(--muted); line-height: 1.5;
+}
+.report-issue-item strong { color: var(--text); }
+.no-issues-msg { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; opacity: 0.5; text-align: center; padding: 6px; }
+
+.report-actions { display: flex; gap: 10px; flex-wrap: wrap; padding: 0 28px 24px; }
+.rpt-action-btn {
+  flex: 1; min-width: 120px; padding: 11px 16px; border-radius: 10px; border: none;
+  font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif;
+  cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.3px;
+}
+.rpt-print { background: var(--accent); color: #0e0f0d; }
+.rpt-copy { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.rpt-action-btn:hover { opacity: 0.82; }
+
+.report-footer {
+  padding: 14px 28px;
+  border-top: 1px solid var(--border);
+  font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace;
+  text-align: center; letter-spacing: 0.5px;
+}
+
+.sign-row { display: flex; gap: 12px; margin-top: 4px; }
+.sign-field { flex: 1; }
+.sign-field label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; display: block; margin-bottom: 5px; letter-spacing: 1px; text-transform: uppercase; }
+.sign-field input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); padding: 8px 11px; font-size: 12px; font-family: 'Nunito', sans-serif;
+  outline: none; transition: border-color 0.2s;
+}
+.sign-field input:focus { border-color: var(--accent); }
+
+.revenue-row { display: flex; gap: 12px; }
+.revenue-field { flex: 1; }
+.revenue-field label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; display: block; margin-bottom: 5px; letter-spacing: 1px; text-transform: uppercase; }
+.revenue-field input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); padding: 8px 11px; font-size: 12px; font-family: 'Nunito', sans-serif;
+  outline: none; transition: border-color 0.2s;
+}
+.revenue-field input:focus { border-color: var(--accent); }
+
+.notes-field textarea {
+  width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); padding: 9px 11px; font-size: 12px; font-family: 'Nunito', sans-serif;
+  outline: none; transition: border-color 0.2s; resize: vertical; min-height: 56px;
+}
+.notes-field textarea:focus { border-color: var(--accent); }
+.notes-field label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; display: block; margin-bottom: 5px; letter-spacing: 1px; text-transform: uppercase; }
+
+.copy-toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #0e0f0d; padding: 9px 20px; border-radius: 20px;
+  font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 999;
+}
+.copy-toast.show { opacity: 1; }
+
+/* ── LOCATION BAR ── */
+.location-bar {
+  padding: 14px 28px 0;
+  display: flex; gap: 8px; flex-wrap: wrap;
+  position: relative; z-index: 1; align-items: center;
+}
+
+.loc-tab {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted);
+  font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap; letter-spacing: 0.5px;
+}
+.loc-tab:hover { border-color: var(--accent); color: var(--accent); }
+.loc-tab.active { background: var(--accent); border-color: var(--accent); color: #0e0f0d; font-weight: 700; }
+
+.add-loc-btn {
+  padding: 6px 12px; border-radius: 20px; border: 1px dashed var(--muted);
+  background: transparent; color: var(--muted);
+  font-family: 'DM Mono', monospace; font-size: 11px; cursor: pointer;
+  transition: all 0.2s;
+}
+.add-loc-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+/* Add location modal */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 500;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  padding: 28px; width: 320px;
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+.modal-box h3 { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); }
+.modal-box input {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); padding: 10px 12px; font-size: 13px;
+  font-family: 'Nunito', sans-serif; outline: none; transition: border-color 0.2s; width: 100%;
+}
+.modal-box input:focus { border-color: var(--accent); }
+.modal-actions { display: flex; gap: 8px; }
+.modal-confirm {
+  flex: 1; background: var(--accent); color: #0e0f0d; border: none;
+  border-radius: 8px; padding: 9px; font-size: 12px; font-weight: 700;
+  font-family: 'Nunito', sans-serif; cursor: pointer;
+}
+.modal-cancel {
+  background: transparent; border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 14px; font-size: 12px; color: var(--muted); cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ── MAIN ── */
+main { padding: 20px 28px; position: relative; z-index: 1; max-width: 860px; }
+
+/* ── SHIFT SELECTOR ── */
+.shift-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+.shift-btn {
+  flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted); cursor: pointer; transition: all 0.25s; text-align: center;
+}
+.shift-btn:hover { border-color: var(--accent); color: var(--text); }
+.shift-btn.active { border-color: var(--accent); background: rgba(168,209,102,0.08); color: var(--accent); }
+.shift-btn .shift-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+.shift-btn .shift-name { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-family: 'DM Mono', monospace; }
+.shift-btn .shift-time { font-size: 10px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+/* Completion banner */
+.complete-banner {
+  display: none; background: linear-gradient(135deg, rgba(168,209,102,0.12), rgba(74,124,31,0.08));
+  border: 1px solid rgba(168,209,102,0.3); border-radius: 12px;
+  padding: 14px 20px; margin-bottom: 18px; text-align: center;
+}
+.complete-banner.show { display: block; animation: slideIn 0.4s ease; }
+.complete-banner h3 { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--accent); }
+.complete-banner p { font-size: 11px; color: var(--muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+@keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+
+.reset-wrap { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+.reset-btn {
+  background: transparent; border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 13px; font-size: 11px; color: var(--muted); cursor: pointer;
+  font-family: 'DM Mono', monospace; transition: all 0.2s;
+}
+.reset-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+
+/* ── SECTION ── */
+.section {
+  margin-bottom: 16px; border-radius: 14px; border: 1px solid var(--border);
+  background: var(--card); overflow: hidden; transition: border-color 0.3s;
+}
+.section:hover { border-color: #3a3e34; }
+
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 15px 18px; cursor: pointer; user-select: none;
+  border-bottom: 1px solid var(--border);
+}
+.section-header:hover { background: rgba(255,255,255,0.02); }
+
+.section-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.section-info { flex: 1; }
+.section-info h3 { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; color: var(--text); }
+.section-info p { font-size: 10px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.section-meta { display: flex; align-items: center; gap: 10px; }
+.section-count { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+.section-chevron { color: var(--muted); font-size: 12px; transition: transform 0.25s; }
+.section.collapsed .section-chevron { transform: rotate(-90deg); }
+.section-progress { width: 56px; height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.section-progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+/* ── CHECKLIST ITEMS ── */
+.checklist { padding: 6px 0; }
+.section.collapsed .checklist { display: none; }
+
+.item {
+  display: flex; align-items: flex-start; gap: 13px;
+  padding: 10px 18px; cursor: pointer; transition: background 0.15s;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.item:last-child { border-bottom: none; }
+.item:hover { background: rgba(255,255,255,0.02); }
+
+.checkbox {
+  width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border);
+  flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; font-size: 11px;
+}
+.item.checked .checkbox { background: var(--done); border-color: var(--done); color: white; }
+.item.checked .item-text { color: var(--muted); text-decoration: line-through; }
+.item.checked .item-note { opacity: 0.4; }
+
+.item-content { flex: 1; }
+.item-text { font-size: 13px; color: var(--text); font-weight: 600; line-height: 1.4; transition: color 0.2s; }
+.item-note { font-size: 11px; color: var(--muted); margin-top: 3px; font-family: 'DM Mono', monospace; line-height: 1.5; transition: opacity 0.2s; }
+
+.item-tag {
+  padding: 2px 7px; border-radius: 10px; font-size: 9px;
+  font-family: 'DM Mono', monospace; font-weight: 600; letter-spacing: 0.5px;
+  text-transform: uppercase; flex-shrink: 0; margin-top: 2px;
+}
+.tag-critical { background: rgba(232,113,74,0.15); color: var(--accent3); border: 1px solid rgba(232,113,74,0.3); }
+.tag-hygiene { background: rgba(168,209,102,0.12); color: var(--accent); border: 1px solid rgba(168,209,102,0.25); }
+.tag-check { background: rgba(245,200,66,0.12); color: var(--accent2); border: 1px solid rgba(245,200,66,0.25); }
+.tag-ops { background: rgba(100,150,220,0.12); color: #8ab4f8; border: 1px solid rgba(100,150,220,0.25); }
+
+/* ── INVENTORY SPECIAL ITEMS ── */
+.inventory-special {
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.inv-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.inv-label {
+  font-size: 12px; font-weight: 700; color: var(--text);
+  min-width: 170px; display: flex; align-items: center; gap: 8px;
+}
+.inv-label span { font-size: 15px; }
+
+/* Stock Level */
+.stock-options { display: flex; gap: 6px; flex-wrap: wrap; }
+.stock-opt {
+  padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-size: 11px;
+  font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.2s;
+}
+.stock-opt:hover { border-color: var(--accent); color: var(--accent); }
+.stock-opt.selected-good { background: rgba(74,124,31,0.2); border-color: #4a7c1f; color: var(--accent); }
+.stock-opt.selected-low { background: rgba(245,200,66,0.15); border-color: var(--accent2); color: var(--accent2); }
+.stock-opt.selected-critical { background: rgba(232,113,74,0.15); border-color: var(--accent3); color: var(--accent3); }
+
+/* Deep Cleaning Toggle */
+.toggle-wrap { display: flex; align-items: center; gap: 10px; }
+.toggle {
+  width: 42px; height: 22px; background: var(--border); border-radius: 20px;
+  position: relative; cursor: pointer; transition: background 0.25s; flex-shrink: 0;
+}
+.toggle::after {
+  content: ''; position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; background: var(--muted);
+  border-radius: 50%; transition: all 0.25s;
+}
+.toggle.on { background: var(--accent); }
+.toggle.on::after { transform: translateX(20px); background: white; }
+.toggle-status { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--muted); }
+.toggle.on + .toggle-status { color: var(--accent); }
+
+/* Coil Temp */
+.temp-input-wrap { display: flex; align-items: center; gap: 8px; }
+.temp-input {
+  width: 80px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text); padding: 7px 10px;
+  font-size: 13px; font-family: 'DM Mono', monospace; outline: none;
+  transition: border-color 0.2s; text-align: center;
+}
+.temp-input:focus { border-color: var(--accent); }
+.temp-unit { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.temp-status { font-size: 10px; font-family: 'DM Mono', monospace; padding: 3px 8px; border-radius: 8px; }
+.temp-ok { background: rgba(74,124,31,0.2); color: var(--accent); }
+.temp-warn { background: rgba(245,200,66,0.15); color: var(--accent2); }
+.temp-danger { background: rgba(232,113,74,0.15); color: var(--accent3); }
+
+/* ── INCIDENT / ISSUE LOG ── */
+.log-section {
+  margin-bottom: 16px; border-radius: 14px; border: 1px solid var(--border);
+  background: var(--card); overflow: hidden;
+}
+.log-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 15px 18px; border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.log-header:hover { background: rgba(255,255,255,0.02); }
+.log-header h3 { font-size: 13px; font-weight: 700; color: var(--text); flex: 1; }
+.log-section.collapsed .log-body { display: none; }
+.log-section.collapsed .section-chevron { transform: rotate(-90deg); }
+
+.log-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+
+.log-form-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.log-form-row input, .log-form-row select, .log-form-row textarea {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  color: var(--text); padding: 9px 11px; font-size: 12px;
+  font-family: 'Nunito', sans-serif; outline: none; transition: border-color 0.2s; flex: 1; min-width: 120px;
+}
+.log-form-row input:focus, .log-form-row select:focus, .log-form-row textarea:focus { border-color: var(--accent); }
+.log-form-row select option { background: #1b1e19; }
+textarea { resize: vertical; min-height: 56px; width: 100%; }
+
+.log-submit-btn {
+  background: var(--accent); color: #0e0f0d; border: none; border-radius: 8px;
+  padding: 9px 18px; font-size: 12px; font-weight: 700;
+  font-family: 'Nunito', sans-serif; cursor: pointer; align-self: flex-start; transition: opacity 0.2s;
+}
+.log-submit-btn:hover { opacity: 0.85; }
+
+.log-entries { display: flex; flex-direction: column; gap: 7px; }
+.log-entry {
+  background: var(--surface); border-radius: 8px; padding: 10px 13px;
+  font-size: 11px; border-left: 3px solid var(--accent3);
+  font-family: 'DM Mono', monospace; color: var(--muted); line-height: 1.6;
+}
+.log-entry strong { color: var(--text); }
+.log-entry .loc-tag { color: #4a4e3a; }
+
+.no-entries { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; opacity: 0.5; text-align: center; padding: 8px; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+@media (max-width: 600px) {
+  header { padding: 14px 16px; }
+  main { padding: 14px 16px; }
+  .shift-selector { flex-wrap: wrap; }
+  .progress-bar-bg { width: 90px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN SCREEN ── -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">E</div>
+    <h2>Epicure Robotics</h2>
+    <p class="login-sub">The Smoothie Bar · Operations</p>
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-error" id="loginError"></div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <p class="login-hint">Authorised personnel only</p>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+
+<header>
+  <div class="brand">
+    <div class="logo-mark">E</div>
+    <div class="brand-text">
+      <h1>Epicure Robotics — The Smoothie Bar</h1>
+      <p>Kiosk Operations</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="globalBar"></div></div>
+      <div class="progress-label" id="globalLabel">0 / 0</div>
+    </div>
+    <div class="date-display" id="dateDisplay"></div>
+    <button class="report-btn" onclick="showDailyReport()">📋 Daily Report</button>
+    <button class="logout-btn" onclick="doLogout()">⎋ Logout</button>
+  </div>
+</header>
+
+<!-- Location Bar -->
+<div class="location-bar" id="locationBar">
+  <button class="loc-tab active" onclick="setLocation(this, 'Wells Fargo')">📍 Wells Fargo</button>
+  <button class="add-loc-btn" onclick="showAddLocation()">+ Add Location</button>
+</div>
+
+<!-- Add Location Modal -->
+<div class="modal-overlay" id="addLocModal">
+  <div class="modal-box">
+    <h3>Add New Location</h3>
+    <input type="text" id="newLocName" placeholder="Location name (e.g. Koramangala)" onkeydown="if(event.key==='Enter')confirmAddLocation()">
+    <div class="modal-actions">
+      <button class="modal-confirm" onclick="confirmAddLocation()">Add</button>
+      <button class="modal-cancel" onclick="hideAddLocation()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- Shift Selector -->
+  <div class="shift-selector">
+    <div class="shift-btn active" onclick="setShift(this, 'opening')">
+      <span class="shift-icon">🌅</span>
+      <div class="shift-name">Opening</div>
+      <div class="shift-time">9:00 AM</div>
+    </div>
+    <div class="shift-btn" onclick="setShift(this, 'closing')">
+      <span class="shift-icon">🌙</span>
+      <div class="shift-name">Closing</div>
+      <div class="shift-time">6:00 PM</div>
+    </div>
+  </div>
+
+  <!-- Completion Banner -->
+  <div class="complete-banner" id="completeBanner">
+    <h3>✅ Shift Complete!</h3>
+    <p id="completeText"></p>
+  </div>
+
+  <div class="reset-wrap">
+    <button class="reset-btn" onclick="resetAll()">↺ Reset Shift</button>
+  </div>
+
+  <!-- Checklist Container -->
+  <div id="checklistContainer"></div>
+
+  <!-- Issue Log -->
+  <div class="log-section" id="issueLogSection">
+    <div class="log-header" onclick="document.getElementById('issueLogSection').classList.toggle('collapsed')">
+      <div class="section-icon" style="background:rgba(232,113,74,0.15);color:var(--accent3);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;">⚠️</div>
+      <h3>Incident / Issue Log</h3>
+      <div class="section-chevron">▾</div>
+    </div>
+    <div class="log-body">
+      <div class="log-form-row">
+        <input type="text" id="issueTime" placeholder="Time (e.g. 10:35 AM)" style="max-width:150px;flex:none;">
+        <select id="issueType">
+          <option value="">Issue Type</option>
+          <option>Machine Downtime</option>
+          <option>Ingredient Stockout</option>
+          <option>Payment Failure</option>
+          <option>Hygiene Concern</option>
+          <option>Customer Complaint</option>
+          <option>Coil Temp Alert</option>
+          <option>Other</option>
+        </select>
+        <input type="text" id="issuePerson" placeholder="Reported by">
+      </div>
+      <div class="log-form-row">
+        <textarea id="issueDesc" placeholder="Describe the issue and action taken..."></textarea>
+      </div>
+      <button class="log-submit-btn" onclick="logIssue()">+ Log Entry</button>
+      <div class="log-entries" id="issueLogEntries">
+        <div class="no-entries" id="noEntriesMsg">No issues logged yet for this session.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+// ── CREDENTIALS ──
+const USERS = {
+  'epicure': 'smoothie@2024',
+  'admin':   'epicure@ops'
+};
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginError');
+  if (USERS[u] && USERS[u] === p) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('dateDisplay').textContent =
+      new Date().toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+    renderChecklist();
+  } else {
+    err.textContent = 'Invalid username or password.';
+    document.getElementById('loginPass').value = '';
+  }
+}
+
+function doLogout() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').textContent = '';
+}
+
+// ── STATE ──
+let currentShift = 'opening';
+let currentLocation = 'Wells Fargo';
+const checkedState = {};
+
+// Inventory special state
+const invState = {}; // per shift+location
+
+function invKey(type) { return `${currentShift}||${currentLocation}||${type}`; }
+
+// ── SHIFT DATA ──
+const shifts = {
+  opening: [
+    {
+      id: 'inventory',
+      title: "Ingredient Loading & Inventory",
+      icon: "🧪",
+      color: "#f5c842",
+      sub: "Pre-shift stock check",
+      items: [
+        { text: "Load and refill all ingredient containers", note: "Check seals and labels before loading", tag: "ops" },
+        { text: "Verify expiry dates on all perishables", note: "Discard anything past expiry — log waste", tag: "critical" },
+        { text: "Log opening stock quantities in inventory sheet", note: "Timestamp all entries for traceability", tag: "ops" },
+        { text: "Ensure all lids and dispensers are secured", note: "Prevent spillage during operation", tag: "check" },
+        { text: "Confirm cup / lid / straw supply (min 100 units)", note: "Alert ops team if below threshold", tag: "ops" },
+      ],
+      hasInventorySpecial: true,
+    },
+    {
+      id: 'hygiene',
+      title: "Hygiene & Sanitation",
+      icon: "🧼",
+      color: "#a8d166",
+      sub: "Opening cleanliness check",
+      items: [
+        { text: "Sanitize all external touch surfaces", note: "Touchscreen, payment terminal, kiosk body", tag: "hygiene" },
+        { text: "Wipe down dispenser area and drip tray", note: "Use food-safe sanitizer only", tag: "hygiene" },
+        { text: "Check and empty waste/disposal compartment", note: "Should not be more than 50% full at shift start", tag: "hygiene" },
+        { text: "Inspect floor area around kiosk — mop if needed", note: "Check for overnight spills or debris", tag: "hygiene" },
+        { text: "Verify staff has washed hands before operations", note: "Log sign-off in compliance sheet", tag: "hygiene" },
+        { text: "Check kiosk area is presentable and signage intact", note: "No damaged or missing signage", tag: "check" },
+      ]
+    },
+  ],
+  closing: [
+    {
+      id: 'inventory',
+      title: "Ingredient Loading & Inventory",
+      icon: "🧪",
+      color: "#f5c842",
+      sub: "End-of-day stock audit",
+      items: [
+        { text: "Count and log all remaining ingredient quantities", note: "Compare against opening stock + any restocks", tag: "ops" },
+        { text: "Identify waste / spillage for the day", note: "Enter in waste log with cause noted", tag: "ops" },
+        { text: "Store perishables correctly — seal and refrigerate", note: "Check expiry windows before storing", tag: "hygiene" },
+        { text: "Flag ingredients to reorder for next day", note: "Send reorder request to ops team by 9:30 PM", tag: "critical" },
+        { text: "Confirm cup / lid / straw closing stock count", note: "Log in daily ops report", tag: "ops" },
+      ],
+      hasInventorySpecial: true,
+    },
+    {
+      id: 'hygiene',
+      title: "Hygiene — Deep Clean",
+      icon: "✨",
+      color: "#a8d166",
+      sub: "End-of-day sanitation",
+      items: [
+        { text: "Run cleaning cycle on all dispensers", note: "Follow PARK system cleaning protocol", tag: "hygiene" },
+        { text: "Drain and rinse liquid dispensers thoroughly", note: "Prevents residue and contamination overnight", tag: "hygiene" },
+        { text: "Full wipe-down of kiosk exterior — all panels", note: "Screen, payment terminal, body", tag: "hygiene" },
+        { text: "Clean and sanitize drip trays and waste compartments", note: "Replace liners", tag: "hygiene" },
+        { text: "Mop floor area around kiosk", note: "Check for liquid spills underneath unit", tag: "hygiene" },
+        { text: "Dispose of single-use items separately", note: "Dry/wet waste segregation per BBMP rules", tag: "hygiene" },
+        { text: "Cover kiosk with dust cover overnight", note: "Protect hardware", tag: "ops" },
+      ]
+    },
+  ]
+};
+
+// ── RENDER ──
+function renderChecklist() {
+  const container = document.getElementById('checklistContainer');
+  container.innerHTML = '';
+  const sections = shifts[currentShift];
+
+  sections.forEach((sec, si) => {
+    const div = document.createElement('div');
+    div.className = 'section';
+    div.id = `sec-${si}`;
+
+    const checkedCount = sec.items.filter((_, ii) => checkedState[stateKey(si, ii)]).length;
+    const pct = Math.round((checkedCount / sec.items.length) * 100);
+    const allDone = checkedCount === sec.items.length;
+
+    let specialHTML = '';
+    if (sec.hasInventorySpecial) {
+      const iKey = invKey('stock');
+      const stockVal = invState[iKey] || '';
+      const cleanVal = invState[invKey('clean')] || false;
+      const tempVal = invState[invKey('temp')] || '';
+
+      let tempStatus = '';
+      if (tempVal !== '') {
+        const t = parseFloat(tempVal);
+        if (t >= 2 && t <= 4) tempStatus = `<span class="temp-status temp-ok">✓ OK (2–4°C)</span>`;
+        else if ((t >= 0 && t < 2) || (t > 4 && t <= 6)) tempStatus = `<span class="temp-status temp-warn">⚠ Check</span>`;
+        else tempStatus = `<span class="temp-status temp-danger">✗ Alert</span>`;
+      }
+
+      specialHTML = `
+        <div class="inventory-special">
+          <!-- Stock Level -->
+          <div class="inv-row">
+            <div class="inv-label"><span>📦</span> Stock Level</div>
+            <div class="stock-options">
+              <button class="stock-opt ${stockVal==='good'?'selected-good':''}" onclick="setStock('good',${si})">🟢 Good</button>
+              <button class="stock-opt ${stockVal==='low'?'selected-low':''}" onclick="setStock('low',${si})">🟡 Low</button>
+              <button class="stock-opt ${stockVal==='critical'?'selected-critical':''}" onclick="setStock('critical',${si})">🔴 Critical</button>
+            </div>
+          </div>
+          <!-- Deep Cleaning Required -->
+          <div class="inv-row">
+            <div class="inv-label"><span>🫧</span> Deep Cleaning Required</div>
+            <div class="toggle-wrap">
+              <div class="toggle ${cleanVal?'on':''}" onclick="toggleClean(${si})" id="cleanToggle-${si}"></div>
+              <span class="toggle-status">${cleanVal?'Yes — required':'No'}</span>
+            </div>
+          </div>
+          <!-- Check Coil Temp -->
+          <div class="inv-row">
+            <div class="inv-label"><span>🌡️</span> Coil Temperature</div>
+            <div class="temp-input-wrap">
+              <input class="temp-input" type="number" step="0.1" placeholder="--" value="${tempVal}"
+                onchange="setTemp(this.value,${si})" oninput="setTemp(this.value,${si})">
+              <span class="temp-unit">°C</span>
+              ${tempStatus}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    div.innerHTML = `
+      <div class="section-header" onclick="toggleSection(${si})">
+        <div class="section-icon" style="background:${sec.color}22;color:${sec.color}">${sec.icon}</div>
+        <div class="section-info">
+          <h3>${sec.title}</h3>
+          <p>${sec.sub}</p>
+        </div>
+        <div class="section-meta">
+          <div class="section-progress">
+            <div class="section-progress-fill" style="width:${pct}%;background:${allDone?'#4a7c1f':sec.color}"></div>
+          </div>
+          <div class="section-count" style="color:${allDone?'#a8d166':''}">${checkedCount}/${sec.items.length}</div>
+          <div class="section-chevron">▾</div>
+        </div>
+      </div>
+      <div class="checklist">
+        ${sec.items.map((item, ii) => {
+          const checked = checkedState[stateKey(si, ii)] || false;
+          return `
+            <div class="item ${checked?'checked':''}" onclick="toggleItem(${si},${ii})">
+              <div class="checkbox">${checked?'✓':''}</div>
+              <div class="item-content">
+                <div class="item-text">${item.text}</div>
+                <div class="item-note">${item.note}</div>
+              </div>
+              <span class="item-tag tag-${item.tag}">${item.tag}</span>
+            </div>
+          `;
+        }).join('')}
+        ${specialHTML}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+
+  updateGlobalProgress();
+}
+
+function stateKey(si, ii) { return `${currentShift}||${currentLocation}||${si}||${ii}`; }
+
+function toggleSection(si) { document.getElementById(`sec-${si}`).classList.toggle('collapsed'); }
+
+function toggleItem(si, ii) {
+  const k = stateKey(si, ii);
+  checkedState[k] = !checkedState[k];
+  renderChecklist();
+}
+
+function setStock(val, si) {
+  invState[invKey('stock')] = invState[invKey('stock')] === val ? '' : val;
+  renderChecklist();
+}
+
+function toggleClean(si) {
+  invState[invKey('clean')] = !invState[invKey('clean')];
+  renderChecklist();
+}
+
+function setTemp(val, si) {
+  invState[invKey('temp')] = val;
+  renderChecklist();
+}
+
+function updateGlobalProgress() {
+  const sections = shifts[currentShift];
+  let total = 0, done = 0;
+  sections.forEach((sec, si) => {
+    sec.items.forEach((_, ii) => { total++; if (checkedState[stateKey(si, ii)]) done++; });
+  });
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('globalBar').style.width = pct + '%';
+  document.getElementById('globalLabel').textContent = `${done} / ${total}`;
+  const banner = document.getElementById('completeBanner');
+  if (done === total && total > 0) {
+    banner.classList.add('show');
+    document.getElementById('completeText').textContent =
+      `All ${total} tasks complete — ${currentShift} shift at ${currentLocation}.`;
+  } else { banner.classList.remove('show'); }
+}
+
+function resetAll() {
+  shifts[currentShift].forEach((sec, si) => {
+    sec.items.forEach((_, ii) => { delete checkedState[stateKey(si, ii)]; });
+  });
+  // reset inventory specials for this shift+location
+  delete invState[invKey('stock')];
+  delete invState[invKey('clean')];
+  delete invState[invKey('temp')];
+  renderChecklist();
+}
+
+// ── LOCATION ──
+function setLocation(el, loc) {
+  document.querySelectorAll('.loc-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentLocation = loc;
+  renderChecklist();
+}
+
+function showAddLocation() { document.getElementById('addLocModal').classList.add('show'); document.getElementById('newLocName').focus(); }
+function hideAddLocation() { document.getElementById('addLocModal').classList.remove('show'); document.getElementById('newLocName').value = ''; }
+
+function confirmAddLocation() {
+  const name = document.getElementById('newLocName').value.trim();
+  if (!name) return;
+  const bar = document.getElementById('locationBar');
+  const addBtn = bar.querySelector('.add-loc-btn');
+  const btn = document.createElement('button');
+  btn.className = 'loc-tab';
+  btn.textContent = '📍 ' + name;
+  btn.onclick = function() { setLocation(this, name); };
+  bar.insertBefore(btn, addBtn);
+  hideAddLocation();
+  setLocation(btn, name);
+}
+
+// ── ISSUE LOG ──
+function logIssue() {
+  const time = document.getElementById('issueTime').value.trim();
+  const type = document.getElementById('issueType').value;
+  const person = document.getElementById('issuePerson').value.trim();
+  const desc = document.getElementById('issueDesc').value.trim();
+  if (!type || !desc) { alert('Please fill in issue type and description.'); return; }
+  const entries = document.getElementById('issueLogEntries');
+  const noMsg = document.getElementById('noEntriesMsg');
+  if (noMsg) noMsg.remove();
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  const now = time || new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+  entry.innerHTML = `<strong>[${now}] ${type}</strong> — ${desc}${person ? ` <em>(by ${person})</em>` : ''} <span class="loc-tag">· ${currentLocation} · ${currentShift}</span>`;
+  entries.prepend(entry);
+  document.getElementById('issueTime').value = '';
+  document.getElementById('issueType').value = '';
+  document.getElementById('issuePerson').value = '';
+  document.getElementById('issueDesc').value = '';
+}
+
+// ── SHIFT ──
+function setShift(el, shift) {
+  document.querySelectorAll('.shift-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  currentShift = shift;
+  renderChecklist();
+}
+
+// ── DAILY REPORT ──
+function showDailyReport() {
+  const d = new Date();
+  const dateStr = d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  document.getElementById('reportMeta').textContent =
+    `${currentLocation} · ${currentShift.toUpperCase()} SHIFT · ${dateStr}`;
+  document.getElementById('rptSubmitTime').value =
+    d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+
+  // Stats
+  const sections = shifts[currentShift];
+  let total = 0, done = 0;
+  sections.forEach((sec, si) => {
+    sec.items.forEach((_, ii) => { total++; if (checkedState[stateKey(si, ii)]) done++; });
+  });
+  const pct = total ? Math.round((done/total)*100) : 0;
+  const stockVal = invState[invKey('stock')] || 'Not recorded';
+  const cleanVal = invState[invKey('clean')] ? 'Yes — Required' : 'No';
+  const tempVal = invState[invKey('temp')] ? invState[invKey('temp')] + '°C' : 'Not recorded';
+
+  document.getElementById('reportStats').innerHTML = `
+    <div class="report-stat">
+      <div class="rs-label">Tasks Completed</div>
+      <div class="rs-value">${done} / ${total}</div>
+      <div class="rs-sub">${pct}% completion rate</div>
+    </div>
+    <div class="report-stat">
+      <div class="rs-label">Shift</div>
+      <div class="rs-value" style="font-size:15px;margin-top:6px;">${currentShift === 'opening' ? '🌅 Opening' : '🌙 Closing'}</div>
+      <div class="rs-sub">${currentShift === 'opening' ? '9:00 AM start' : '6:00 PM start'}</div>
+    </div>
+    <div class="report-stat">
+      <div class="rs-label">Location</div>
+      <div class="rs-value" style="font-size:14px;margin-top:6px;">📍 ${currentLocation}</div>
+      <div class="rs-sub">Active kiosk</div>
+    </div>
+    <div class="report-stat">
+      <div class="rs-label">Issues Logged</div>
+      <div class="rs-value">${document.querySelectorAll('#issueLogEntries .log-entry').length}</div>
+      <div class="rs-sub">This session</div>
+    </div>
+  `;
+
+  // Checklist section breakdown
+  let clHTML = '';
+  sections.forEach((sec, si) => {
+    const secDone = sec.items.filter((_, ii) => checkedState[stateKey(si, ii)]).length;
+    const secPct = Math.round((secDone / sec.items.length) * 100);
+    const cls = secPct === 100 ? 'rr-good' : secPct >= 50 ? 'rr-warn' : 'rr-bad';
+    clHTML += `<div class="report-row">
+      <span class="rr-label">${sec.icon} ${sec.title}</span>
+      <span class="rr-val ${cls}">${secDone}/${sec.items.length} (${secPct}%)</span>
+    </div>`;
+  });
+  document.getElementById('reportChecklist').innerHTML = clHTML;
+
+  // Inventory snapshot
+  const stockCls = stockVal === 'good' ? 'rr-good' : stockVal === 'low' ? 'rr-warn' : stockVal === 'critical' ? 'rr-bad' : 'rr-muted';
+  const stockLabel = stockVal === 'good' ? '🟢 Good' : stockVal === 'low' ? '🟡 Low' : stockVal === 'critical' ? '🔴 Critical' : 'Not recorded';
+  let tempCls = 'rr-muted';
+  if (invState[invKey('temp')]) {
+    const t = parseFloat(invState[invKey('temp')]);
+    tempCls = (t >= 2 && t <= 4) ? 'rr-good' : (t >= 0 && t <= 6) ? 'rr-warn' : 'rr-bad';
+  }
+  document.getElementById('reportInventory').innerHTML = `
+    <div class="report-row"><span class="rr-label">📦 Stock Level</span><span class="rr-val ${stockCls}">${stockLabel}</span></div>
+    <div class="report-row"><span class="rr-label">🫧 Deep Cleaning Required</span><span class="rr-val ${cleanVal.startsWith('Yes') ? 'rr-warn' : 'rr-good'}">${cleanVal}</span></div>
+    <div class="report-row"><span class="rr-label">🌡️ Coil Temperature</span><span class="rr-val ${tempCls}">${tempVal}</span></div>
+  `;
+
+  // Issues
+  const issueEls = document.querySelectorAll('#issueLogEntries .log-entry');
+  if (issueEls.length === 0) {
+    document.getElementById('reportIssues').innerHTML = '<div class="no-issues-msg">No issues logged this session.</div>';
+  } else {
+    let iHTML = '';
+    issueEls.forEach(el => { iHTML += `<div class="report-issue-item">${el.innerHTML}</div>`; });
+    document.getElementById('reportIssues').innerHTML = iHTML;
+  }
+
+  document.getElementById('reportOverlay').classList.add('show');
+}
+
+function hideReport() {
+  document.getElementById('reportOverlay').classList.remove('show');
+}
+
+function printReport() {
+  window.print();
+}
+
+function copyReportText() {
+  const d = new Date();
+  const dateStr = d.toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const sections = shifts[currentShift];
+  let total = 0, done = 0;
+  sections.forEach((sec, si) => {
+    sec.items.forEach((_, ii) => { total++; if (checkedState[stateKey(si, ii)]) done++; });
+  });
+
+  const stockVal = invState[invKey('stock')] || 'Not recorded';
+  const cleanVal = invState[invKey('clean')] ? 'Yes' : 'No';
+  const tempVal = invState[invKey('temp')] ? invState[invKey('temp')] + '°C' : 'Not recorded';
+  const orders = document.getElementById('rptOrders').value || '-';
+  const revenue = document.getElementById('rptRevenue').value || '-';
+  const aov = document.getElementById('rptAOV').value || '-';
+  const notes = document.getElementById('rptNotes').value || '-';
+  const staff = document.getElementById('rptStaff').value || '-';
+  const supervisor = document.getElementById('rptSupervisor').value || '-';
+  const submitTime = document.getElementById('rptSubmitTime').value || '-';
+
+  let issueLines = '';
+  document.querySelectorAll('#issueLogEntries .log-entry').forEach((el, i) => {
+    issueLines += `  ${i+1}. ${el.innerText}\n`;
+  });
+  if (!issueLines) issueLines = '  None\n';
+
+  let checkLines = '';
+  sections.forEach((sec, si) => {
+    const secDone = sec.items.filter((_, ii) => checkedState[stateKey(si, ii)]).length;
+    checkLines += `  ${sec.title}: ${secDone}/${sec.items.length}\n`;
+  });
+
+  const text = `
+========================================
+EPICURE ROBOTICS — THE SMOOTHIE BAR
+Daily Operations Report
+========================================
+Location   : ${currentLocation}
+Shift      : ${currentShift.toUpperCase()} (${currentShift === 'opening' ? '9:00 AM' : '6:00 PM'})
+Date       : ${dateStr}
+Submitted  : ${submitTime}
+
+--- CHECKLIST SUMMARY ---
+Tasks Done : ${done} / ${total} (${total ? Math.round((done/total)*100) : 0}%)
+${checkLines}
+--- INVENTORY ---
+Stock Level         : ${stockVal}
+Deep Clean Required : ${cleanVal}
+Coil Temperature    : ${tempVal}
+
+--- FINANCE ---
+Total Orders : ${orders}
+Revenue      : ₹${revenue}
+Avg Order    : ₹${aov}
+
+--- ISSUES LOGGED ---
+${issueLines}
+--- NOTES ---
+${notes}
+
+--- SIGN-OFF ---
+Staff      : ${staff}
+Supervisor : ${supervisor}
+========================================
+`.trim();
+
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('copyToast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  });
+}
+</script>
+
+<!-- ── DAILY REPORT MODAL ── -->
+<div class="report-overlay" id="reportOverlay" onclick="if(event.target===this)hideReport()">
+  <div class="report-modal">
+    <div class="report-top">
+      <div class="report-top-left">
+        <h2>Daily Operations Report</h2>
+        <p id="reportMeta"></p>
+      </div>
+      <button class="report-close" onclick="hideReport()">✕</button>
+    </div>
+    <div class="report-body">
+      <div><div class="report-section-title">Shift Summary</div><div class="report-grid" id="reportStats"></div></div>
+      <div><div class="report-section-title">Checklist Completion</div><div id="reportChecklist"></div></div>
+      <div><div class="report-section-title">Inventory Snapshot</div><div id="reportInventory"></div></div>
+      <div>
+        <div class="report-section-title">Revenue & Finance</div>
+        <div class="revenue-row">
+          <div class="revenue-field"><label>Total Orders</label><input type="number" id="rptOrders" placeholder="e.g. 48"></div>
+          <div class="revenue-field"><label>Revenue (₹)</label><input type="number" id="rptRevenue" placeholder="e.g. 9600"></div>
+          <div class="revenue-field"><label>Avg Order Value (₹)</label><input type="number" id="rptAOV" placeholder="e.g. 200"></div>
+        </div>
+      </div>
+      <div><div class="report-section-title">Issues Logged</div><div class="report-issues-list" id="reportIssues"></div></div>
+      <div>
+        <div class="report-section-title">Additional Notes</div>
+        <div class="notes-field"><label>Shift Notes / Observations</label><textarea id="rptNotes" placeholder="Any observations, feedback, or follow-ups for next shift..."></textarea></div>
+      </div>
+      <div>
+        <div class="report-section-title">Sign-off</div>
+        <div class="sign-row">
+          <div class="sign-field"><label>Staff Name</label><input type="text" id="rptStaff" placeholder="Your name"></div>
+          <div class="sign-field"><label>Supervisor</label><input type="text" id="rptSupervisor" placeholder="Supervisor name"></div>
+          <div class="sign-field"><label>Time Submitted</label><input type="text" id="rptSubmitTime" readonly style="opacity:0.6;cursor:not-allowed;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="report-actions">
+      <button class="rpt-action-btn rpt-print" onclick="printReport()">🖨️ Print / Save PDF</button>
+      <button class="rpt-action-btn rpt-copy" onclick="copyReportText()">📋 Copy as Text</button>
+    </div>
+    <div class="report-footer">Epicure Robotics — The Smoothie Bar · Confidential Operations Document</div>
+  </div>
+</div>
+<div class="copy-toast" id="copyToast">✓ Report copied to clipboard!</div>
+
+</body>
+</html>
